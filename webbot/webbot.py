@@ -38,8 +38,8 @@ class Browser:
         - List containing all the errors which might have occurred during performing an action like click ,type etc.
     """
 
-    def __init__(self, showWindow=True, proxy=None , downloadPath:str=None, driverPath:str=None, arguments=["--disable-dev-shm-usage","--no-sandbox"]):
-        options = webdriver.ChromeOptions()
+    def __init__(self, showWindow=True, proxy=None, downloadPath:str=None, driverPath:str=None, webdriverInstance:str='Chrome', arguments=["--disable-dev-shm-usage","--no-sandbox"]):
+        options = getattr(webdriver, webdriverInstance + 'Options', lambda: None)()
 
         for argument in arguments:
             options.add_argument(argument)
@@ -77,7 +77,7 @@ class Browser:
 
             os.chmod(driverPath, 0o755)
 
-        self.driver = webdriver.Chrome(executable_path=driverPath, options=options)
+        self.driver = getattr(webdriver, webdriverInstance)(executable_path=driverPath, options=options)
         self.Key = Keys
         self.errors = []
 
