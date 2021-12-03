@@ -27,6 +27,7 @@ class Browser:
             - showWindow : If false , will run a headless browser without showing GUI window.
             - proxy : Url of any optional proxy server.
             - driverPath: can specify the path of an alternative chromedriver
+            - useSeleniumGrid : If true , will use webdriver.Remote and connect to http://localhost:4444 
 
 
 
@@ -38,7 +39,7 @@ class Browser:
         - List containing all the errors which might have occurred during performing an action like click ,type etc.
     """
 
-    def __init__(self, showWindow=True, proxy=None, downloadPath:str=None, driverPath:str=None, webdriverInstance:str='Chrome', arguments=["--disable-dev-shm-usage","--no-sandbox"]):
+    def __init__(self, showWindow=True, proxy=None, downloadPath:str=None, driverPath:str=None, webdriverInstance:str='Chrome', useSeleniumGrid=False, arguments=["--disable-dev-shm-usage","--no-sandbox"]):
         options = getattr(webdriver, webdriverInstance + 'Options', lambda: None)()
 
         for argument in arguments:
@@ -65,19 +66,23 @@ class Browser:
             options.headless = True
             options.add_argument("--headless")
 
-        if driverPath is None:
-            driverfilename = ''
-            if sys.platform == 'linux' or sys.platform == 'linux2':
-                driverfilename = 'chrome_linux'
-            elif sys.platform == 'win32':
-                driverfilename = 'chrome_windows.exe'
-            elif sys.platform == 'darwin':
-                driverfilename = 'chrome_mac'
-            driverPath = os.path.join(os.path.split(__file__)[0], 'drivers{0}{1}'.format(os.path.sep, driverfilename))
+        if useSeleniumGrid:
+            self.driver = webdriver.Remote(command_executor='http://localhost:4444', options=options)
+        else:
+            if driverPath is None:
+                driverfilename = ''
+                if sys.platform == 'linux' or sys.platform == 'linux2':
+                    driverfilename = 'chrome_linux'
+                elif sys.platform == 'win32':
+                    driverfilename = 'chrome_windows.exe'
+                elif sys.platform == 'darwin':
+                    driverfilename = 'chrome_mac'
+                driverPath = os.path.join(os.path.split(__file__)[0], 'drivers{0}{1}'.format(os.path.sep, driverfilename))
 
-            os.chmod(driverPath, 0o755)
+                os.chmod(driverPath, 0o755)
 
-        self.driver = getattr(webdriver, webdriverInstance)(executable_path=driverPath, options=options)
+            self.driver = getattr(webdriver, webdriverInstance)(executable_path=driverPath, options=options)
+
         self.Key = Keys
         self.errors = []
 
