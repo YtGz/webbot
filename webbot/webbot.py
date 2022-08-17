@@ -40,7 +40,7 @@ class Browser:
         - List containing all the errors which might have occurred during performing an action like click ,type etc.
     """
 
-    def __init__(self, showWindow=True, proxy=None, downloadPath:str=None, driverPath:str=None, webdriverInstance:str='Chrome', useSeleniumGrid=False, arguments=["--disable-dev-shm-usage","--no-sandbox"]):
+    def __init__(self, showWindow=True, proxy=None, downloadPath:str=None, driverPath:str=None, extensionsPath:str='extensions', webdriverInstance:str='Chrome', useSeleniumGrid=False, arguments=["--disable-dev-shm-usage","--no-sandbox"]):
         options = getattr(webdriver, webdriverInstance + 'Options', lambda: None)()
 
         for argument in arguments:
@@ -83,6 +83,11 @@ class Browser:
                 os.chmod(driverPath, 0o755)
 
             self.driver = getattr(webdriver, webdriverInstance)(executable_path=driverPath, options=options)
+
+        # add extension that prevents cloudflare-guarded sites from blocking webbot
+        self.__add_extension('privacy_pass-3.0.3', extensionsPath, webdriverInstance)
+        # add extension that aids with solving captchas
+        self.__add_extension('buster_captcha_solver-1.3.1', extensionsPath, webdriverInstance)
 
         self.Key = Keys
         self.errors = []
@@ -638,6 +643,22 @@ class Browser:
             except exceptions.WebDriverException as E:
                 self.__set_error(E, element, ''' tagname : {} , id : {}  , classname : {} , id_attribute : {}
                 '''.format(element.tag_name, element.id, element.get_attribute('class'), element.get_attribute('id')))
+
+    def __add_extension(self, extension_name:str, extensions_base_path:str, webdriver_instance:str):
+
+        if(webdriver_instance == "Chrome"):
+            chrome_options = self.driver.ChromeOptions()
+            extension_relative_path = os.path.join(extensions_base_path, extension_name + '.crx')
+            chrome_options.add_extension(extension_relative_path)
+
+        if(webdriver_instance == "Firefox"):
+            extension_relative_path = os.path.join(extensions_base_path, extension_name + '.xpi')
+            extension_absolute_path = os.path.abspath(extension_relative_path)
+            self.driver.install_addon(extension_absolute_path, temporary=True)
+            profile = self.driver.FirefoxProfile()
+            profile.add_extension(absolute_path)
+            profile.set_preference("security.fileuri.strict_origin_policy", False)
+            profile.update_preferences()
 
 
 if __name__ == '__main__':
