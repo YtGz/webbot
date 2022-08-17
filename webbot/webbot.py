@@ -5,7 +5,7 @@ import errno
 import sys
 from collections import OrderedDict
 
-from selenium import webdriver
+import undetected_chromedriver as webdriver
 from selenium.common import exceptions
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
