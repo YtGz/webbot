@@ -9,6 +9,7 @@ import undetected_chromedriver as webdriver
 from selenium.common import exceptions
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
 
 
 # TODO : ADD AN ASSERT TEXT OR ELEMENT FUNCTION
@@ -216,7 +217,7 @@ class Browser:
                     self.element_to_score_id_set.add(element.id)
 
         def element_fetch_helper(xpath, score):
-            add_to_init_text_matches_score(self.driver.find_elements_by_xpath(xpath), score)
+            add_to_init_text_matches_score(self.driver.find_elements(By.XPATH, xpath), score)
 
         def find_input_element_for_label(elementlist, score):
             """This method finds the input tag elements by taking in the label elements and assigns the score
@@ -230,15 +231,15 @@ class Browser:
                 try:
                     element_fetch_helper(("//body//input[@id='{}']".format(possible_input_id)), score)
 
-                    add_to_init_text_matches_score(element.find_elements_by_xpath(
+                    add_to_init_text_matches_score(element.find_elements(By.XPATH,
                         "../input[contains(translate(@id , '{}' ,'{}' ) , '{}')]".format(text.upper(), text.lower(),
                                                                                          text.lower())), score - 5)
 
-                    add_to_init_text_matches_score(element.find_elements_by_xpath("/./preceding::input"), score - 7)
+                    add_to_init_text_matches_score(element.find_elements(By.XPATH, "/./preceding::input"), score - 7)
 
                     element_fetch_helper(("//body//input[@name='{}']".format(possible_input_id)), score - 6)
 
-                    add_to_init_text_matches_score(element.find_elements_by_xpath("../input"), score - 10)
+                    add_to_init_text_matches_score(element.find_elements_by(By.XPATH, "../input"), score - 10)
 
                 except exceptions.NoSuchElementException as E:
                     self.__set_error(E, element)
@@ -252,13 +253,13 @@ class Browser:
                         test_attr, text.upper(), text.lower(), text.lower())), score=33)
 
                 find_input_element_for_label(
-                    self.driver.find_elements_by_xpath("//body//label[text()='{}']".format(text)), score=45)
+                    self.driver.find_elements(By.XPATH, "//body//label[text()='{}']".format(text)), score=45)
 
                 find_input_element_for_label(
-                    self.driver.find_elements_by_xpath("//body//label[contains( text() , '{}')]".format(text)),
+                    self.driver.find_elements(By.XPATH, "//body//label[contains( text() , '{}')]".format(text)),
                     score=37)
 
-                find_input_element_for_label(self.driver.find_elements_by_xpath(
+                find_input_element_for_label(self.driver.find_elements(By.XPATH,
                     "//body//label[contains(translate( text() , '{}' , '{}' ) , '{}')]".format(text.upper(),
                                                                                                text.lower(),
                                                                                                text.lower())),
@@ -271,7 +272,7 @@ class Browser:
                 element_fetch_helper(("//body//{}[text()='{}']".format(tagvar, text)), score=45)
                 element_fetch_helper(("//body//{}//*[text()='{}']".format(tagvar, text)), score=45)
 
-                add_to_init_text_matches_score(self.driver.find_elements_by_link_text("{}".format(text)), score=43)
+                add_to_init_text_matches_score(self.driver.find_elements(By.LINK_TEXT, "{}".format(text)), score=43)
 
                 element_fetch_helper(("//body//{}[contains(text() , '{}')]".format(tagvar, text)), score=37)
                 element_fetch_helper(("//body//{}//*[contains(text() , '{}')]".format(tagvar, text)), score=37)
@@ -302,10 +303,10 @@ class Browser:
                     text.upper(), text.lower(), text.lower())), score=25)
 
         if css_selector:
-            add_to_init_text_matches_score(self.driver.find_elements_by_css_selector(css_selector), 80)
+            add_to_init_text_matches_score(self.driver.find_elements(By.CSS_SELECTOR, css_selector), 80)
 
         if xpath:
-            add_to_init_text_matches_score(self.driver.find_elements_by_xpath(xpath), 100)
+            add_to_init_text_matches_score(self.driver.find_elements(By.XPATH, xpath), 100)
 
         if not text and tag:
             element_fetch_helper(("//body//{}".format(tag)), score=50)
@@ -340,9 +341,9 @@ class Browser:
                 handle_button_or_link_tag('a')
 
         if id:
-            add_to_init_text_matches_score(self.driver.find_elements_by_id(id), 100)
+            add_to_init_text_matches_score(self.driver.find_elements(By.ID, id), 100)
         if classname:
-            add_to_init_text_matches_score(self.driver.find_elements_by_class_name(classname), 50)
+            add_to_init_text_matches_score(self.driver.find_elements(By.CLASS_NAME, classname), 50)
 
         if not len(self.element_to_score.keys()) and loose_match:
             handle_loose_check()
