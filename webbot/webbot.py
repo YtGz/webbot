@@ -40,11 +40,14 @@ class Browser:
         - List containing all the errors which might have occurred during performing an action like click ,type etc.
     """
 
-    def __init__(self, showWindow=True, proxy=None, downloadPath:str=None, driverPath:str=None, webdriverInstance:str='Chrome', useSeleniumGrid=False, arguments=["--disable-dev-shm-usage","--no-sandbox"]):
+    def __init__(self, showWindow=True, proxy=None, downloadPath:str=None, driverPath:str=None, webdriverInstance:str='Chrome', useSeleniumGrid=False, experimentalOptions=[{"name":"", "value": ""}], arguments=["--disable-dev-shm-usage","--no-sandbox"]):
         options = getattr(webdriver, webdriverInstance + 'Options', lambda: None)()
 
         for argument in arguments:
             options.add_argument(argument)
+
+        for experimentalOption in experimentalOptions:
+            options.add_experimental_option(experimentalOption["name"], experimentalOption["value"])
 
         if downloadPath is not None and isinstance(downloadPath,str):
             absolutePath = os.path.abspath(downloadPath)
